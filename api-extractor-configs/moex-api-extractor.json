@@ -1,0 +1,10 @@
+{
+  "extends": "./api-extractor-base.json",
+  "projectFolder": "..",
+  "mainEntryPointFilePath": "<projectFolder>/lib/moex-api/dist/index.d.ts",
+  "dtsRollup": {
+    "enabled": true,
+    "untrimmedFilePath": "<projectFolder>/lib/moex-api/dist/moex-api.d.ts",
+    "publicTrimmedFilePath": "<projectFolder>/lib/moex-api/dist/moex-api-public.d.ts"
+  }
+} 

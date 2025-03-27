@@ -1,9 +1,11 @@
 /**
  * Type definitions for MOEX API
+ * @packageDocumentation
  */
 
 /**
  * Enumeration of candle intervals
+ * @public
  */
 export enum MOEXCandleInterval {
   MIN1 = '1',      // 1 minute
@@ -16,11 +18,32 @@ export enum MOEXCandleInterval {
 
 /**
  * Basic response structure from MOEX API
+ * @public
  */
 export interface MOEXBaseResponse {
-  [key: string]: {
-    metadata: { [key: string]: any };
+  /**
+   * Block name to data mapping
+   * Each block contains metadata, columns and data arrays
+   */
+  [blockName: string]: {
+    /**
+     * Metadata about the data block
+     */
+    metadata: { 
+      /**
+       * Metadata field to value mapping
+       */
+      [key: string]: any 
+    };
+    
+    /**
+     * Column names for the data rows
+     */
     columns: string[];
+    
+    /**
+     * Data rows, each row is an array of values corresponding to columns
+     */
     data: any[][];
   };
 }

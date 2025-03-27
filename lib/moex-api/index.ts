@@ -1,8 +1,10 @@
 /**
  * MOEX API Client Library
  * 
- * A comprehensive TypeScript client library for the Moscow Exchange (MOEX) 
- * Information & Statistical Server (ISS) API.
+ * This library provides a set of functions for interacting with the Moscow Exchange (MOEX) ISS API.
+ * It allows fetching securities data, historical prices, order books, and other market information.
+ * 
+ * @packageDocumentation
  */
 
 // Export the main API client and instance
@@ -68,4 +70,35 @@ export {
 export { fetchTrendingStocks } from './fetchTrendingStocks';
 
 // Export examples
-export { examples } from './examples'; 
+export { examples } from './examples';
+
+/**
+ * Creates a standard query parameter string from an object
+ * @param params - Object containing query parameters
+ * @returns Formatted query string
+ * @internal
+ */
+export function createQueryString(params: Record<string, any>): string {
+  return Object.entries(params)
+    .filter(([_, value]) => value !== undefined && value !== null)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join('&');
+}
+
+/**
+ * Formats a date object or string into YYYY-MM-DD format required by MOEX API
+ * @param date - Date to format
+ * @returns Formatted date string
+ * @internal
+ */
+export function formatDate(date: Date | string): string {
+  if (typeof date === 'string') {
+    return date;
+  }
+  
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
+} 
