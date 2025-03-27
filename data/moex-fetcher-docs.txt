@@ -1,0 +1,437 @@
+API Reference
+=============
+
+Core Client
+-----------
+
+.. py:class:: moex_fetcher.MoexApiClient(session=None, rate_limit=None, timeout=30)
+
+   The primary client for interacting with the MOEX ISS API.
+
+   :param session: Optional requests.Session instance for making HTTP requests
+   :param rate_limit: Minimum seconds between requests for rate limiting (defaults to 0.2 seconds)
+   :param timeout: Default timeout for requests in seconds (defaults to 30 seconds)
+
+   .. py:method:: get_engines()
+
+      Gets a list of trading engines available on MOEX.
+
+      :return: A pandas DataFrame with information about trading engines
+      :rtype: pandas.DataFrame
+
+   .. py:method:: get_markets(engine)
+
+      Gets a list of markets for a specific trading engine.
+
+      :param str engine: Trading engine ID (e.g., 'stock', 'futures', 'currency')
+      :return: A DataFrame with information about available markets within the specified engine
+      :rtype: pandas.DataFrame
+
+   .. py:method:: get_boards(engine, market)
+
+      Gets trading boards for a specific market.
+
+      :param str engine: Trading engine ID (e.g., 'stock', 'futures')
+      :param str market: Market ID (e.g., 'shares', 'bonds', 'index')
+      :return: A DataFrame with information about trading boards
+      :rtype: pandas.DataFrame
+
+   .. py:method:: get_securities(engine=None, market=None, board=None, query=None)
+
+      Gets a list of securities based on specified criteria.
+
+      :param str engine: Trading engine ID (optional)
+      :param str market: Market ID (optional, requires engine)
+      :param str board: Board ID (optional, requires engine and market)
+      :param str query: Search query to filter securities (optional)
+      :return: A DataFrame with security information
+      :rtype: pandas.DataFrame
+
+   .. py:method:: get_security_info(security_id)
+
+      Gets detailed information about a specific security.
+
+      :param str security_id: The security ID (ticker)
+      :return: A dictionary of DataFrames with security information
+      :rtype: dict[str, pandas.DataFrame]
+
+   .. py:method:: get_market_data(security_id, engine=None, market=None, board=None)
+
+      Gets current market data for a specific security.
+
+      :param str security_id: The security ID (ticker)
+      :param str engine: Trading engine ID (optional)
+      :param str market: Market ID (optional)
+      :param str board: Board ID (optional)
+      :return: A DataFrame with current market data
+      :rtype: pandas.DataFrame
+
+   .. py:method:: get_orderbook(security_id, engine, market, board, depth=20)
+
+      Gets the current orderbook (order queue) for a specific security.
+
+      :param str security_id: The security ID (ticker)
+      :param str engine: Trading engine ID
+      :param str market: Market ID
+      :param str board: Board ID
+      :param int depth: Orderbook depth (number of price levels)
+      :return: A DataFrame with bid and ask orders at different price levels
+      :rtype: pandas.DataFrame
+
+   .. py:method:: get_trades(security_id, engine, market, board=None, limit=50)
+
+      Gets recent trades for a specific security.
+
+      :param str security_id: The security ID (ticker)
+      :param str engine: Trading engine ID
+      :param str market: Market ID
+      :param str board: Board ID (optional)
+      :param int limit: Maximum number of trades to return
+      :return: A DataFrame with recent trades
+      :rtype: pandas.DataFrame
+
+   .. py:method:: get_candles(security_id, engine, market, interval=24, start_date=None, end_date=None, board=None, board_group=None)
+
+      Gets historical candles (OHLCV) for a specific security.
+
+      :param str security_id: The security ID (ticker)
+      :param str engine: Trading engine ID
+      :param str market: Market ID
+      :param int interval: Candle interval code (1=1min, 10=10min, 60=1h, 24=1day, 7=1week, 31=1month, 4=1quarter)
+      :param start_date: Start date for data range
+      :type start_date: str or datetime.date or datetime.datetime, optional
+      :param end_date: End date for data range
+      :type end_date: str or datetime.date or datetime.datetime, optional
+      :param str board: Board ID (optional)
+      :param str board_group: Board group ID (optional)
+      :return: A DataFrame with candle data (open, high, low, close, volume)
+      :rtype: pandas.DataFrame
+
+   .. py:method:: get_market_history(security_id, engine, market, start_date=None, end_date=None, board=None, columns=None)
+
+      Gets historical trading data for a specific security.
+
+      :param str security_id: The security ID (ticker)
+      :param str engine: Trading engine ID
+      :param str market: Market ID
+      :param start_date: Start date for data range
+      :type start_date: str or datetime.date or datetime.datetime, optional
+      :param end_date: End date for data range
+      :type end_date: str or datetime.date or datetime.datetime, optional
+      :param str board: Board ID (optional)
+      :param list[str] columns: Specific columns to request (optional)
+      :return: A DataFrame with historical trading data
+      :rtype: pandas.DataFrame
+
+   .. py:method:: get_board_history(board, engine='stock', market='shares', date=None)
+
+      Gets historical trading data for all securities on a specific board for a single date.
+
+      :param str board: Board ID
+      :param str engine: Trading engine ID
+      :param str market: Market ID
+      :param date: The specific date to get data for
+      :type date: str or datetime.date or datetime.datetime, optional
+      :return: A DataFrame with historical trading data for all securities on the board
+      :rtype: pandas.DataFrame
+
+   .. py:method:: get_indices()
+
+      Gets a list of indices calculated by MOEX.
+
+      :return: A DataFrame with index information
+      :rtype: pandas.DataFrame
+
+   .. py:method:: get_index_components(index_id)
+
+      Gets the components (constituents) of a specific MOEX index.
+
+      :param str index_id: The index ID (e.g., 'IMOEX', 'RTSI')
+      :return: A DataFrame with index component securities and their weights
+      :rtype: pandas.DataFrame
+
+   .. py:method:: get_data(endpoint, params=None, path_params=None, method='GET', timeout=None)
+
+      Makes a request to the MOEX ISS API and returns the parsed data.
+
+      :param str endpoint: The API endpoint path
+      :param dict params: Query parameters for the request
+      :param dict path_params: Parameters to be substituted in the endpoint path
+      :param str method: HTTP method (GET, POST, etc.)
+      :param int timeout: Request timeout in seconds
+      :return: A dictionary with parsed data blocks
+      :rtype: dict[str, list[dict]]
+
+   .. py:method:: get_dataframe(endpoint, params=None, path_params=None, method='GET', timeout=None, block_name=None, normalize=True)
+
+      Makes a request to the MOEX ISS API and returns the response as pandas DataFrame(s).
+
+      :param str endpoint: The API endpoint path
+      :param dict params: Query parameters for the request
+      :param dict path_params: Parameters to be substituted in the endpoint path
+      :param str method: HTTP method (GET, POST, etc.)
+      :param int timeout: Request timeout in seconds
+      :param str block_name: Specific data block to return
+      :param bool normalize: Whether to normalize the DataFrame columns
+      :return: Either a single DataFrame or a dictionary of DataFrames for each data block
+      :rtype: pandas.DataFrame or dict[str, pandas.DataFrame]
+
+High-Level Endpoints
+-------------------
+
+.. py:function:: moex_fetcher.endpoints.get_stock_securities(client, board='TQBR')
+
+   Gets a list of stock securities from the main board.
+
+   :param MoexApiClient client: An initialized MoexApiClient
+   :param str board: Board ID (defaults to "TQBR", the main board for stocks)
+   :return: A DataFrame with stock information
+   :rtype: pandas.DataFrame
+
+.. py:function:: moex_fetcher.endpoints.get_bond_securities(client, board='TQOB')
+
+   Gets a list of bond securities from the main board.
+
+   :param MoexApiClient client: An initialized MoexApiClient
+   :param str board: Board ID (defaults to "TQOB", the main bond board)
+   :return: A DataFrame with bond information
+   :rtype: pandas.DataFrame
+
+.. py:function:: moex_fetcher.endpoints.get_security_history(client, ticker, start_date=None, end_date=None, board='TQBR', engine='stock', market='shares', market_data=True)
+
+   Gets historical trading data for a specific security.
+
+   :param MoexApiClient client: An initialized MoexApiClient
+   :param str ticker: The security ticker symbol
+   :param start_date: Start date for the data range
+   :type start_date: str or datetime.date or datetime.datetime, optional
+   :param end_date: End date for the data range
+   :type end_date: str or datetime.date or datetime.datetime, optional
+   :param str board: Board ID (defaults to "TQBR", the main stock board)
+   :param str engine: Trading engine ID (defaults to 'stock')
+   :param str market: Market ID (defaults to 'shares')
+   :param bool market_data: Whether to include market data (prices, volumes) or only security info
+   :return: A DataFrame with historical trading data
+   :rtype: pandas.DataFrame
+
+.. py:function:: moex_fetcher.endpoints.get_stock_candles(client, ticker, interval='day', start_date=None, end_date=None, board='TQBR')
+
+   Gets historical candles for a stock security with human-friendly interval names.
+
+   :param MoexApiClient client: An initialized MoexApiClient
+   :param str ticker: The security ticker symbol
+   :param str interval: Time interval ('min', '10min', 'hour', 'day', 'week', 'month', 'quarter')
+   :param start_date: Start date for the data range
+   :type start_date: str or datetime.date or datetime.datetime, optional
+   :param end_date: End date for the data range
+   :type end_date: str or datetime.date or datetime.datetime, optional
+   :param str board: Board ID (defaults to "TQBR", the main stock board)
+   :return: A DataFrame with candle data (open, high, low, close, volume)
+   :rtype: pandas.DataFrame
+   :raises ValueError: If the interval name is not recognized
+
+.. py:function:: moex_fetcher.endpoints.get_index_composition(client, index_id='IMOEX')
+
+   Gets the composition (component securities) of a MOEX index.
+
+   :param MoexApiClient client: An initialized MoexApiClient
+   :param str index_id: The index ID (defaults to "IMOEX", the Moscow Exchange Index)
+   :return: A DataFrame with index component securities and their weights
+   :rtype: pandas.DataFrame
+
+.. py:function:: moex_fetcher.endpoints.find_security(client, query, engine=None, market=None)
+
+   Searches for securities by name or ticker.
+
+   :param MoexApiClient client: An initialized MoexApiClient
+   :param str query: Search query string
+   :param str engine: Optional filter by engine ID
+   :param str market: Optional filter by market ID (requires engine to be specified)
+   :return: A DataFrame with matching securities
+   :rtype: pandas.DataFrame
+
+.. py:function:: moex_fetcher.endpoints.get_market_data_snapshot(client, tickers, board='TQBR', engine='stock', market='shares')
+
+   Gets current market data for multiple securities in a single DataFrame.
+
+   :param MoexApiClient client: An initialized MoexApiClient
+   :param list[str] tickers: List of security ticker symbols
+   :param str board: Board ID (defaults to "TQBR", the main stock board)
+   :param str engine: Trading engine ID (defaults to 'stock')
+   :param str market: Market ID (defaults to 'shares')
+   :return: A DataFrame with current market data for all requested securities
+   :rtype: pandas.DataFrame
+
+.. py:function:: moex_fetcher.endpoints.get_board_securities_with_market_data(client, board='TQBR', engine='stock', market='shares')
+
+   Gets a list of securities on a board with their current market data.
+
+   :param MoexApiClient client: An initialized MoexApiClient
+   :param str board: Board ID (defaults to "TQBR", the main stock board)
+   :param str engine: Trading engine ID (defaults to 'stock')
+   :param str market: Market ID (defaults to 'shares')
+   :return: A DataFrame with securities and their current market data
+   :rtype: pandas.DataFrame
+
+.. py:function:: moex_fetcher.endpoints.get_multi_timeframe_candles(client, ticker, intervals, start_date=None, end_date=None, board='TQBR')
+
+   Gets candles for multiple timeframes for a single security.
+
+   :param MoexApiClient client: An initialized MoexApiClient
+   :param str ticker: The security ticker symbol
+   :param list[str] intervals: List of interval names ('min', 'hour', 'day', etc.)
+   :param start_date: Start date for the data range
+   :type start_date: str or datetime.date or datetime.datetime, optional
+   :param end_date: End date for the data range
+   :type end_date: str or datetime.date or datetime.datetime, optional
+   :param str board: Board ID (defaults to "TQBR", the main stock board)
+   :return: A dictionary mapping interval names to DataFrames with candle data
+   :rtype: dict[str, pandas.DataFrame]
+
+Utility Functions
+----------------
+
+.. py:function:: moex_fetcher.utils.build_url(base_url, endpoint, **path_params)
+
+   Constructs a URL by joining the base URL with the endpoint and replacing path parameters.
+
+   :param str base_url: The base URL for the API
+   :param str endpoint: The API endpoint (can contain placeholders like '[engine]')
+   :param path_params: Key-value pairs for replacing placeholders in the endpoint
+   :return: A complete URL with path parameters replaced
+   :rtype: str
+
+.. py:function:: moex_fetcher.utils.format_date(date_value)
+
+   Formats a date object or string to the YYYY-MM-DD format required by the MOEX API.
+
+   :param date_value: A date object, datetime object, or string in a valid date format
+   :type date_value: str or datetime.date or datetime.datetime
+   :return: A string in the format 'YYYY-MM-DD'
+   :rtype: str
+   :raises ValueError: If the date_value cannot be parsed
+
+.. py:function:: moex_fetcher.utils.validate_date_range(start_date=None, end_date=None, max_interval_days=None)
+
+   Validates and formats a date range for API requests.
+
+   :param start_date: The start date for the range
+   :type start_date: str or datetime.date or datetime.datetime, optional
+   :param end_date: The end date for the range
+   :type end_date: str or datetime.date or datetime.datetime, optional
+   :param max_interval_days: Maximum allowed interval in days between start_date and end_date
+   :type max_interval_days: int, optional
+   :return: A tuple of (formatted_start_date, formatted_end_date)
+   :rtype: tuple[str, str]
+   :raises ValueError: If dates are invalid or the interval exceeds max_interval_days
+
+.. py:function:: moex_fetcher.utils.build_query_params(params)
+
+   Builds query parameters for API requests, handling special cases like lists.
+
+   :param dict params: Dictionary of parameter names and values
+   :return: Dictionary with all values converted to strings as required by the API
+   :rtype: dict[str, str]
+
+.. py:function:: moex_fetcher.utils.parse_iso_datetime(datetime_str)
+
+   Parses an ISO-formatted datetime string from the API response.
+
+   :param str datetime_str: A string in ISO format (YYYY-MM-DDThh:mm:ss.sssZ)
+   :return: A datetime object
+   :rtype: datetime.datetime
+   :raises ValueError: If the string cannot be parsed
+
+Parser Functions
+---------------
+
+.. py:function:: moex_fetcher.parsers.parse_json_response(response_data)
+
+   Parses a JSON response from the MOEX ISS API.
+
+   :param dict response_data: The JSON response from the API
+   :return: A dictionary where keys are block names and values are lists of dictionaries
+   :rtype: dict[str, list[dict]]
+   :raises MoexParsingError: If the response structure is invalid or cannot be parsed
+
+.. py:function:: moex_fetcher.parsers.response_to_dataframe(parsed_response, block_name=None)
+
+   Converts a parsed API response into pandas DataFrame(s).
+
+   :param parsed_response: Either a dictionary of data blocks or a single data block
+   :type parsed_response: dict[str, list[dict]] or list[dict]
+   :param str block_name: Name of the specific block to convert (if multiple blocks are present)
+   :return: Either a single DataFrame or a dictionary of DataFrames
+   :rtype: pandas.DataFrame or dict[str, pandas.DataFrame]
+   :raises MoexParsingError: If the specified block_name is not found or the data cannot be converted
+
+.. py:function:: moex_fetcher.parsers.normalize_dataframe(df, date_columns=None, numeric_columns=None, categorical_columns=None, index_column=None)
+
+   Normalizes a DataFrame by converting columns to appropriate data types.
+
+   :param pandas.DataFrame df: The DataFrame to normalize
+   :param list[str] date_columns: List of column names to convert to datetime
+   :param list[str] numeric_columns: List of column names to convert to numeric
+   :param list[str] categorical_columns: List of column names to convert to categorical
+   :param str index_column: Column to set as the DataFrame index
+   :return: The normalized DataFrame
+   :rtype: pandas.DataFrame
+
+.. py:function:: moex_fetcher.parsers.detect_and_convert_types(df)
+
+   Automatically detects and converts DataFrame columns to appropriate types.
+
+   :param pandas.DataFrame df: The DataFrame to process
+   :return: A new DataFrame with converted data types
+   :rtype: pandas.DataFrame
+
+Exceptions
+----------
+
+.. py:exception:: moex_fetcher.exceptions.MoexApiError
+
+   Base exception for all MOEX API errors.
+
+   :param str message: Error message
+   :param int status_code: HTTP status code (if applicable)
+   :param requests.Response response: Original HTTP response (if applicable)
+
+.. py:exception:: moex_fetcher.exceptions.MoexConnectionError
+
+   Raised when a connection to the MOEX API cannot be established.
+
+   :param str message: Error message
+   :param Exception original_error: Original exception that caused the connection error
+
+.. py:exception:: moex_fetcher.exceptions.MoexResponseError
+
+   Raised when the MOEX API returns an invalid or unexpected response.
+
+   :param str message: Error message
+   :param int status_code: HTTP status code
+   :param requests.Response response: Original HTTP response
+
+.. py:exception:: moex_fetcher.exceptions.MoexAuthError
+
+   Raised when there is an authentication issue with the MOEX API.
+
+   :param str message: Error message
+   :param int status_code: HTTP status code
+   :param requests.Response response: Original HTTP response
+
+.. py:exception:: moex_fetcher.exceptions.MoexRateLimitError
+
+   Raised when API rate limits are exceeded.
+
+   :param str message: Error message
+   :param int status_code: HTTP status code
+   :param requests.Response response: Original HTTP response
+   :param int retry_after: Seconds to wait before retrying
+
+.. py:exception:: moex_fetcher.exceptions.MoexParsingError
+
+   Raised when there is an error parsing the API response.
+
+   :param str message: Error message
+   :param object data: The data that failed to parse
+   :param Exception original_error: Original exception that caused the parsing error

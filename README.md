@@ -73,3 +73,60 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+## MOEX Streaming Service with Convex
+
+This project includes a real-time streaming service for Moscow Exchange (MOEX) data, implemented using Convex as the backend platform. The service automatically fetches and updates data from the MOEX API, making it available to clients in real-time.
+
+### Features
+
+- **Real-time Data Streaming**: Live data updates pushed to all connected clients
+- **Automated Data Collection**: Scheduled jobs fetch and update data regularly
+- **Type-safe API**: Full TypeScript support for backend and frontend
+- **Filtering & Search**: Advanced filtering capabilities for securities
+- **User Favorites**: Save securities to your favorites list
+- **Notifications**: Get notified when prices change significantly
+
+### Data Types
+
+The service provides the following data:
+
+- **Futures**: Updated every 5 minutes during trading hours
+- **Options**: Updated every 5 minutes during trading hours
+- **Shares**: Complete list of companies traded on MOEX
+- **Funds Flow**: Daily data on funds movement by individual and institutional investors
+
+### Technology Stack
+
+- **Frontend**: Next.js + React
+- **Backend**: Convex (serverless backend with real-time capabilities)
+- **API Integration**: MOEX ISS API client
+- **Styling**: Tailwind CSS + shadcn/ui
+
+### Getting Started
+
+1. Clone the repository
+2. Install dependencies with `npm install`
+3. Set up environment variables:
+   - Create `.env.local` with your Convex deployment URL
+4. Start the development server:
+   ```
+   npm run dev
+   ```
+5. Navigate to `/moex/streaming` to see the real-time data interface
+
+### Project Structure
+
+- `convex/` - Convex backend code
+  - `schema.ts` - Database schema definition
+  - `moexApi.ts` - MOEX API integration actions
+  - `mutations.ts` - Database mutation functions
+  - `queries.ts` - Database query functions
+  - `crons.ts` - Scheduled job definitions
+  - `cronActions.ts` - Actions for scheduled jobs
+  - `http.ts` - HTTP endpoints for integration
+
+- `app/components/` - React components
+  - `ConvexMoexExample.tsx` - Example component for displaying streaming data
+
+- `lib/moex-api/` - MOEX API client library

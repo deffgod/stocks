@@ -1,19 +1,23 @@
 import { cn } from "@/lib/utils"
 
+// Mock data function instead of API call
 async function fetchSectorPerformance() {
-  const url = `https://financialmodelingprep.com/api/v3/sector-performance?apikey=${process.env.FMP_API_KEY}`
-  const options = {
-    method: "GET",
-    next: {
-      revalidate: 3600,
-    },
-  }
-  const res = await fetch(url, options)
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch sector performance")
-  }
-  return res.json()
+  // Static mock data for sector performance
+  const mockData = [
+    { sector: "Technology", changesPercentage: "1.25" },
+    { sector: "Healthcare", changesPercentage: "0.78" },
+    { sector: "Consumer Cyclical", changesPercentage: "-0.43" },
+    { sector: "Financial Services", changesPercentage: "0.92" },
+    { sector: "Communication Services", changesPercentage: "0.35" },
+    { sector: "Industrials", changesPercentage: "-0.21" },
+    { sector: "Consumer Defensive", changesPercentage: "0.56" },
+    { sector: "Energy", changesPercentage: "-0.67" },
+    { sector: "Basic Materials", changesPercentage: "0.12" },
+    { sector: "Real Estate", changesPercentage: "-0.33" },
+    { sector: "Utilities", changesPercentage: "0.41" },
+  ]
+  
+  return mockData
 }
 
 interface Sector {

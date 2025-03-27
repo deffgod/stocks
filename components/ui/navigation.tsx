@@ -17,6 +17,7 @@ import CommandMenu from "./command-menu"
 const NAVIGATION = [
   { title: "Markets", href: "/" },
   { title: "Screener", href: "/screener" },
+  { title: "MOEX", href: "/moex" },
 ]
 
 export default function Navigation() {

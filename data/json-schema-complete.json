@@ -1,0 +1,362 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MOEX Market Structure",
+  "description": "JSON Schema for the Moscow Exchange (MOEX) market structure",
+  "type": "object",
+  "properties": {
+    "engines": {
+      "type": "array",
+      "description": "Trading engines (platforms) available on MOEX",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "title"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier of the trading engine"
+          },
+          "name": {
+            "type": "string",
+            "description": "Code name of the trading engine"
+          },
+          "title": {
+            "type": "string",
+            "description": "Full name of the trading engine in Russian"
+          }
+        }
+      }
+    },
+    "markets": {
+      "type": "array",
+      "description": "Markets available within trading engines",
+      "items": {
+        "type": "object",
+        "required": ["id", "trade_engine_id", "market_name", "market_title"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier of the market"
+          },
+          "trade_engine_id": {
+            "type": "integer",
+            "description": "Reference to the parent trading engine"
+          },
+          "trade_engine_name": {
+            "type": "string",
+            "description": "Code name of the parent trading engine"
+          },
+          "trade_engine_title": {
+            "type": "string",
+            "description": "Full name of the parent trading engine in Russian"
+          },
+          "market_name": {
+            "type": "string",
+            "description": "Code name of the market"
+          },
+          "market_title": {
+            "type": "string",
+            "description": "Full name of the market in Russian"
+          },
+          "market_id": {
+            "type": "integer",
+            "description": "Identifier of the market (duplicates id)"
+          },
+          "marketplace": {
+            "type": "string",
+            "description": "Associated marketplace code"
+          },
+          "is_otc": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if this is an over-the-counter market (0=No, 1=Yes)"
+          },
+          "has_history_files": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if historical files are available (0=No, 1=Yes)"
+          },
+          "has_history_trades_files": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if historical trades files are available (0=No, 1=Yes)"
+          },
+          "has_trades": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if trades are available (0=No, 1=Yes)"
+          },
+          "has_history": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if history is available (0=No, 1=Yes)"
+          },
+          "has_candles": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if candles are available (0=No, 1=Yes)"
+          },
+          "has_orderbook": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if orderbook is available (0=No, 1=Yes)"
+          },
+          "has_tradingsession": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if trading session info is available (0=No, 1=Yes)"
+          },
+          "has_extra_yields": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if extra yields are available (0=No, 1=Yes)"
+          },
+          "has_delay": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if market data has delay (0=No, 1=Yes)"
+          }
+        }
+      }
+    },
+    "boardGroups": {
+      "type": "array",
+      "description": "Board groups (collections of trading boards)",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "title", "market_id", "trade_engine_id"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier of the board group"
+          },
+          "trade_engine_id": {
+            "type": "integer",
+            "description": "Reference to the parent trading engine"
+          },
+          "trade_engine_name": {
+            "type": "string",
+            "description": "Code name of the parent trading engine"
+          },
+          "trade_engine_title": {
+            "type": "string",
+            "description": "Full name of the parent trading engine in Russian"
+          },
+          "market_id": {
+            "type": "integer",
+            "description": "Reference to the parent market"
+          },
+          "market_name": {
+            "type": "string",
+            "description": "Code name of the parent market"
+          },
+          "name": {
+            "type": "string",
+            "description": "Code name of the board group"
+          },
+          "title": {
+            "type": "string",
+            "description": "Full name of the board group in Russian"
+          },
+          "is_default": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if this is the default board group for the market (0=No, 1=Yes)"
+          },
+          "board_group_id": {
+            "type": "integer",
+            "description": "Identifier of the board group (duplicates id)"
+          },
+          "is_traded": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if this board group is actively traded (0=No, 1=Yes)"
+          },
+          "is_order_driven": {
+            "type": "integer",
+            "enum": [0, 1, null],
+            "description": "Flag indicating if this board group is order-driven (0=No, 1=Yes)"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of the board group (e.g., 'main', 'otc', 'repo', etc.)"
+          }
+        }
+      }
+    },
+    "boards": {
+      "type": "array",
+      "description": "Trading boards (specific trading modes)",
+      "items": {
+        "type": "object",
+        "required": ["id", "boardid", "board_title", "board_group_id", "market_id", "engine_id"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier of the board"
+          },
+          "board_group_id": {
+            "type": "integer",
+            "description": "Reference to the parent board group"
+          },
+          "engine_id": {
+            "type": "integer",
+            "description": "Reference to the parent trading engine"
+          },
+          "market_id": {
+            "type": "integer",
+            "description": "Reference to the parent market"
+          },
+          "boardid": {
+            "type": "string",
+            "description": "Unique code identifier of the board (used in API calls)"
+          },
+          "board_title": {
+            "type": "string",
+            "description": "Full name of the board in Russian"
+          },
+          "is_traded": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if this board is actively traded (0=No, 1=Yes)"
+          },
+          "has_candles": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if candles are available for this board (0=No, 1=Yes)"
+          },
+          "is_primary": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if this is a primary board (0=No, 1=Yes)"
+          }
+        }
+      }
+    },
+    "securityTypes": {
+      "type": "array",
+      "description": "Types of securities available for trading",
+      "items": {
+        "type": "object",
+        "required": ["id", "security_type_name", "security_type_title", "trade_engine_id"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier of the security type"
+          },
+          "trade_engine_id": {
+            "type": "integer",
+            "description": "Reference to the associated trading engine"
+          },
+          "trade_engine_name": {
+            "type": "string",
+            "description": "Code name of the associated trading engine"
+          },
+          "trade_engine_title": {
+            "type": "string",
+            "description": "Full name of the associated trading engine in Russian"
+          },
+          "security_type_name": {
+            "type": "string",
+            "description": "Code name of the security type"
+          },
+          "security_type_title": {
+            "type": "string",
+            "description": "Full name of the security type in Russian"
+          },
+          "security_group_name": {
+            "type": "string",
+            "description": "Reference to the associated security group"
+          },
+          "stock_type": {
+            "type": ["string", "null"],
+            "description": "Code for stock type (if applicable)"
+          }
+        }
+      }
+    },
+    "securityGroups": {
+      "type": "array",
+      "description": "Groups of security types",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "title"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier of the security group"
+          },
+          "name": {
+            "type": "string",
+            "description": "Code name of the security group"
+          },
+          "title": {
+            "type": "string",
+            "description": "Full name of the security group in Russian"
+          },
+          "is_hidden": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "Flag indicating if the group is hidden in the interface (0=No, 1=Yes)"
+          }
+        }
+      }
+    },
+    "securityCollections": {
+      "type": "array",
+      "description": "Themed collections of securities",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "title", "security_group_id"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier of the security collection"
+          },
+          "name": {
+            "type": "string",
+            "description": "Code name of the security collection"
+          },
+          "title": {
+            "type": "string",
+            "description": "Full name of the security collection in Russian"
+          },
+          "security_group_id": {
+            "type": "integer",
+            "description": "Reference to the associated security group"
+          }
+        }
+      }
+    },
+    "durations": {
+      "type": "array",
+      "description": "Time intervals for data retrieval",
+      "items": {
+        "type": "object",
+        "required": ["interval", "duration", "title"],
+        "properties": {
+          "interval": {
+            "type": "integer",
+            "description": "Interval identifier"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "Duration in seconds"
+          },
+          "days": {
+            "type": ["integer", "null"],
+            "description": "Number of days (if applicable)"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of the duration in Russian"
+          },
+          "hint": {
+            "type": "string",
+            "description": "Short hint/code for the duration"
+          }
+        }
+      }
+    }
+  },
+  "required": ["engines", "markets", "boardGroups", "boards", "securityTypes", "securityGroups", "securityCollections", "durations"]
+}
