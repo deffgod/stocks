@@ -13,27 +13,48 @@ import { Button } from "@/components/ui/button";
 import { Check, Bell, ArrowUp, ArrowDown } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-// Import either the real or mock hooks based on environment
-import { useMockQuery as useQuery, useMockMutation as useMutation } from "./MockProvider";
+// Mock notifications data
+const MOCK_NOTIFICATIONS = [
+  {
+    _id: { id: "1" },
+    secid: "SBER",
+    message: "Цена Сбербанк изменилась на +5.23%",
+    timestamp: Date.now() - 3600000,
+    read: false,
+  },
+  {
+    _id: { id: "2" },
+    secid: "GAZP",
+    message: "Цена Газпром изменилась на -3.18%",
+    timestamp: Date.now() - 7200000,
+    read: false,
+  },
+  {
+    _id: { id: "3" },
+    secid: "LKOH",
+    message: "Цена Лукойл изменилась на +2.75%",
+    timestamp: Date.now() - 86400000,
+    read: true,
+  },
+  {
+    _id: { id: "4" },
+    secid: "YNDX",
+    message: "Цена Яндекс изменилась на -1.45%",
+    timestamp: Date.now() - 172800000,
+    read: true,
+  },
+  {
+    _id: { id: "5" },
+    secid: "ROSN",
+    message: "Цена Роснефть изменилась на +0.87%",
+    timestamp: Date.now() - 259200000,
+    read: true,
+  },
+];
 
 export default function MoexNotifications() {
-  // Hard-coded user ID for demo purposes
-  // In a real app, this would come from authentication
-  const userId = "user123";
   const [showRead, setShowRead] = useState(false);
-  
-  // Get user notifications
-  const notifications = useQuery('api.queries.getUserNotifications', {
-    userId,
-    unreadOnly: !showRead,
-    limit: 50,
-  });
-  
-  // Mutation to mark notification as read
-  const markAsRead = useMutation('api.mutations.markNotificationAsRead');
-  
-  // Mutation to mark all notifications as read
-  const markAllAsRead = useMutation('api.mutations.markAllNotificationsAsRead');
+  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
   
   // Format the timestamp to a human-readable format
   const formatTimestamp = (timestamp) => {
@@ -51,11 +72,20 @@ export default function MoexNotifications() {
     return match?.[1] ? parseFloat(match[1]) : null;
   };
   
-  const handleMarkAllAsRead = async () => {
-    if (notifications?.length > 0) {
-      await markAllAsRead({ userId });
-    }
+  const handleMarkAsRead = (notificationId) => {
+    setNotifications(notifications.map(notif => 
+      notif._id.id === notificationId ? { ...notif, read: true } : notif
+    ));
   };
+  
+  const handleMarkAllAsRead = () => {
+    setNotifications(notifications.map(notif => ({ ...notif, read: true })));
+  };
+  
+  // Filter notifications based on read status
+  const filteredNotifications = showRead 
+    ? notifications 
+    : notifications.filter(n => !n.read);
   
   return (
     <div className="space-y-4">
@@ -78,7 +108,7 @@ export default function MoexNotifications() {
             variant="outline" 
             size="sm"
             onClick={handleMarkAllAsRead}
-            disabled={!notifications || notifications.length === 0}
+            disabled={filteredNotifications.length === 0}
           >
             Mark All as Read
           </Button>
@@ -86,15 +116,7 @@ export default function MoexNotifications() {
       </div>
       
       <div className="space-y-4">
-        {!notifications ? (
-          <Card>
-            <CardContent className="py-10 flex justify-center items-center">
-              <div className="animate-pulse text-muted-foreground">
-                Loading notifications...
-              </div>
-            </CardContent>
-          </Card>
-        ) : notifications.length === 0 ? (
+        {filteredNotifications.length === 0 ? (
           <Card>
             <CardContent className="py-10 flex justify-center items-center">
               <div className="text-muted-foreground">
@@ -103,7 +125,7 @@ export default function MoexNotifications() {
             </CardContent>
           </Card>
         ) : (
-          notifications.map((notification) => {
+          filteredNotifications.map((notification) => {
             const priceChange = extractPriceChange(notification.message);
             const isPositive = priceChange !== null && priceChange > 0;
             return (
@@ -130,7 +152,7 @@ export default function MoexNotifications() {
                         variant="ghost" 
                         size="icon" 
                         className="h-7 w-7" 
-                        onClick={() => markAsRead({ notificationId: notification._id })}
+                        onClick={() => handleMarkAsRead(notification._id.id)}
                       >
                         <Check className="h-4 w-4" />
                       </Button>

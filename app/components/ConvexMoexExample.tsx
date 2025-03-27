@@ -21,33 +21,72 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown, RefreshCw } from "lucide-react";
 
-// Import either the real or mock hooks based on environment
-import { useMockQuery as useQuery } from "./MockProvider";
+// Mock data for the example
+const MOCK_SECURITIES = [
+  {
+    id: "1",
+    secid: "SBER",
+    shortname: "Сбербанк",
+    type: "shares",
+    lastPrice: 285.92,
+    change: 1.23,
+    volume: 5628900,
+  },
+  {
+    id: "2",
+    secid: "GAZP",
+    shortname: "Газпром",
+    type: "shares",
+    lastPrice: 168.44,
+    change: -0.67,
+    volume: 3421500,
+  },
+  {
+    id: "3",
+    secid: "LKOH",
+    shortname: "Лукойл",
+    type: "shares",
+    lastPrice: 6784.00,
+    change: 0.42,
+    volume: 782300,
+  },
+  {
+    id: "4",
+    secid: "RIH4",
+    shortname: "РТС-3.24",
+    type: "futures",
+    lastPrice: 165430,
+    change: 2.15,
+    volume: 1245720,
+  },
+  {
+    id: "5",
+    secid: "SiH4",
+    shortname: "USD-3.24",
+    type: "futures",
+    lastPrice: 89742,
+    change: -0.83,
+    volume: 3567800,
+  },
+];
 
 /**
  * Example component for displaying MOEX securities data from Convex
  */
 export default function ConvexMoexExample() {
-  // State for filters
-  const [securityType, setSecurityType] = useState("futures");
+  const [securityType, setSecurityType] = useState("shares");
   const [searchTerm, setSearchTerm] = useState("");
-  const [limit, setLimit] = useState(20);
-  
-  // Get securities with filters
-  const securitiesData = useQuery('api.queries.getSecuritiesFiltered', {
-    filters: {
-      type: securityType,
-      searchTerm: searchTerm.length > 0 ? searchTerm : undefined,
-    },
-    limit,
-    skip: 0,
-  });
-  
-  // Get stats for types of securities
-  const typeStats = useQuery('api.queries.getSecuritiesTypeStats');
+  const [limit, setLimit] = useState(10);
+
+  // Static type stats
+  const typeStats = [
+    { type: "futures", count: 45 },
+    { type: "options", count: 67 },
+    { type: "shares", count: 89 },
+  ];
   
   // Format price for display
-  const formatPrice = (price: number | null | undefined) => {
+  const formatPrice = (price) => {
     if (price === null || price === undefined) return "N/A";
     return new Intl.NumberFormat("ru-RU", {
       style: "decimal",
@@ -57,7 +96,7 @@ export default function ConvexMoexExample() {
   };
   
   // Format percentage change
-  const formatChange = (change: number | null | undefined) => {
+  const formatChange = (change) => {
     if (change === null || change === undefined) return "0%";
     const formattedChange = new Intl.NumberFormat("ru-RU", {
       style: "decimal",
@@ -69,17 +108,30 @@ export default function ConvexMoexExample() {
   };
   
   // Determine badge color based on change
-  const getChangeBadgeColor = (change: number | null | undefined) => {
+  const getChangeBadgeColor = (change) => {
     if (!change) return "secondary";
-    return change > 0 ? "green" : change < 0 ? "destructive" : "secondary";
+    return change > 0 ? "default" : change < 0 ? "destructive" : "secondary";
   };
+
+  // Filter securities based on selected type and search term
+  const filteredSecurities = MOCK_SECURITIES.filter(security => {
+    // Filter by type
+    const typeMatch = securityType === "all" || security.type === securityType;
+    
+    // Filter by search term
+    const searchMatch = searchTerm === "" || 
+      security.secid.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      security.shortname.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    return typeMatch && searchMatch;
+  }).slice(0, limit);
 
   return (
     <div className="space-y-6">
       <CardHeader>
         <CardTitle>MOEX Securities Data</CardTitle>
         <CardDescription>
-          Live data from Moscow Exchange via Convex
+          Mock data example (Convex integration pending)
         </CardDescription>
       </CardHeader>
       
@@ -95,6 +147,7 @@ export default function ConvexMoexExample() {
               <SelectValue placeholder="Security Type" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="futures">Futures</SelectItem>
               <SelectItem value="options">Options</SelectItem>
               <SelectItem value="shares">Shares</SelectItem>
@@ -136,48 +189,21 @@ export default function ConvexMoexExample() {
       </div>
       
       {/* Stats */}
-      {typeStats && (
-        <div className="flex flex-wrap gap-2 pb-4">
-          {typeStats.map((stat) => (
-            <Badge
-              key={stat.type}
-              variant={stat.type === securityType ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => setSecurityType(stat.type)}
-            >
-              {stat.type}: {stat.count}
-            </Badge>
-          ))}
-        </div>
-      )}
-      
-      {/* Loading state */}
-      {!securitiesData && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex justify-center">
-              <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-            <p className="text-center pt-4 text-muted-foreground">
-              Loading securities data...
-            </p>
-          </CardContent>
-        </Card>
-      )}
-      
-      {/* No results */}
-      {securitiesData && securitiesData.securities.length === 0 && (
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center py-8 text-muted-foreground">
-              No securities found matching your filters.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      <div className="flex flex-wrap gap-2 pb-4">
+        {typeStats.map((stat) => (
+          <Badge
+            key={stat.type}
+            variant={stat.type === securityType ? "default" : "outline"}
+            className="cursor-pointer"
+            onClick={() => setSecurityType(stat.type)}
+          >
+            {stat.type}: {stat.count}
+          </Badge>
+        ))}
+      </div>
       
       {/* Securities table */}
-      {securitiesData && securitiesData.securities.length > 0 && (
+      {filteredSecurities.length > 0 ? (
         <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -197,8 +223,8 @@ export default function ConvexMoexExample() {
                   </tr>
                 </thead>
                 <tbody>
-                  {securitiesData.securities.map((security) => (
-                    <tr key={security._id.id} className="border-b hover:bg-muted/50">
+                  {filteredSecurities.map((security) => (
+                    <tr key={security.id} className="border-b hover:bg-muted/50">
                       <td className="p-3 font-mono text-sm">{security.secid}</td>
                       <td className="p-3">{security.shortname}</td>
                       <td className="p-3 text-right">
@@ -225,14 +251,22 @@ export default function ConvexMoexExample() {
           </CardContent>
           <CardFooter className="flex justify-between border-t px-6 py-3">
             <div className="text-xs text-muted-foreground">
-              Showing {securitiesData.securities.length} securities
+              Showing {filteredSecurities.length} securities
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled={!securitiesData.continuationToken}>
+              <Button variant="outline" size="sm" disabled={filteredSecurities.length < limit}>
                 Load More
               </Button>
             </div>
           </CardFooter>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center py-8 text-muted-foreground">
+              No securities found matching your filters.
+            </p>
+          </CardContent>
         </Card>
       )}
     </div>

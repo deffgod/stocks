@@ -57,6 +57,8 @@ export interface MOEXSearchFilters {
   board?: string;
   securityTypes?: string[];
   searchText?: string;
+  query?: string;
+  [key: string]: any; // Allow for additional filter properties
 }
 
 /**

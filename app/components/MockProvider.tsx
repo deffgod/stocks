@@ -154,14 +154,17 @@ const MOCK_NOTIFICATIONS = [
 ];
 
 // Create mock context
-const MockConvexContext = createContext({
+const MockConvexContext = createContext<{
+  useQuery: <T>(queryFn: string, args: any) => T | null;
+  useMutation: (mutationFn: any) => (args: any) => Promise<any>;
+}>({
   useQuery: () => null,
   useMutation: () => () => Promise.resolve(),
 });
 
 // Create mock hooks
-export function useMockQuery(queryFn, args) {
-  const [data, setData] = useState(null);
+export function useMockQuery<T>(queryFn: string, args: any): T | null {
+  const [data, setData] = useState<T | null>(null);
   
   useEffect(() => {
     // Simulate network delay
@@ -188,7 +191,7 @@ export function useMockQuery(queryFn, args) {
           securities: limitedSecurities,
           continuationToken: filteredSecurities.length > (limit || 10) ? "mock-token" : undefined,
           filters,
-        });
+        } as T);
       } 
       else if (queryFn === 'api.queries.getFundsFlow') {
         const { entityType, dateFrom, dateTo, limit } = args;
@@ -206,33 +209,34 @@ export function useMockQuery(queryFn, args) {
           filteredFundsFlow = filteredFundsFlow.filter(f => f.date <= dateTo);
         }
         
-        setData(filteredFundsFlow.slice(0, limit || 50));
+        setData(filteredFundsFlow.slice(0, limit || 50) as T);
       }
       else if (queryFn === 'api.queries.getUserNotifications') {
         const { userId, unreadOnly, limit } = args;
-        let filteredNotifications = [...MOCK_NOTIFICATIONS];
-        
-        if (userId) {
-          filteredNotifications = filteredNotifications.filter(n => n.userId === userId);
-        }
+        let notifications = [...MOCK_NOTIFICATIONS];
         
         if (unreadOnly) {
-          filteredNotifications = filteredNotifications.filter(n => !n.read);
+          notifications = notifications.filter(n => !n.read);
         }
         
-        setData(filteredNotifications.slice(0, limit || 50));
+        setData(notifications.slice(0, limit || 10) as T);
       }
       else if (queryFn === 'api.queries.getSecuritiesTypeStats') {
-        // Group by type and count
-        const stats = {};
-        MOCK_SECURITIES.forEach(security => {
-          if (!stats[security.type]) {
-            stats[security.type] = 0;
+        // Calculate stats from mock securities
+        const stats = MOCK_SECURITIES.reduce((acc, security) => {
+          const type = security.type;
+          if (!acc[type]) {
+            acc[type] = 0;
           }
-          stats[security.type]++;
-        });
+          acc[type]++;
+          return acc;
+        }, {});
         
-        setData(Object.entries(stats).map(([type, count]) => ({ type, count })));
+        // Convert to array format expected by the component
+        setData(Object.entries(stats).map(([type, count]) => ({
+          type,
+          count,
+        })) as T);
       }
     }, 500); // Simulate network delay
     
